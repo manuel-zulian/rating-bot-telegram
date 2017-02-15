@@ -1,7 +1,8 @@
 package services
 
 import com.google.inject.Inject
-import models.User
+import models.{Picture, User}
+import org.joda.time.DateTime
 import play.api.{Configuration, Logger}
 import play.api.libs.json.JsValue
 
@@ -10,6 +11,7 @@ import play.api.libs.json.JsValue
   */
 class UpdateProcessService @Inject() (
   userService: UserService,
+  pictureService: PictureService,
   sendMessageService: SendMessageService,
   config: Configuration) {
   def process(update: JsValue): Unit = {
@@ -23,7 +25,7 @@ class UpdateProcessService @Inject() (
       val url = (update \ "message" \ "text").as[String].substring(offset, offset + length)
       Logger.debug(s"Url detected: $url")
 
-      // TODO Save in the db a picture with votable false.
+      pictureService.findOrCreate(Picture(0, "temp", Some(url), Some(DateTime.now), false))
 
       sendMessageService.send(chatId, "If the link posted was a cosplay, reply with /name [name] to name it and vote it (eg, 8/7). Name and vote in separate messages.")
     }
@@ -35,11 +37,8 @@ class UpdateProcessService @Inject() (
       val command = (update \ "message" \ "text").as[String].substring(offset, offset + length)
       Logger.debug(s"Command detected: $command")
 
+      pictureService.makeVotable(pictureService.getLastNotVotable().get)
       // TODO Find the last picture not votable and make it votable.
     }
-
-    val url = s"${config.getString("telegramApiBaseUrl").get}${config.getString("telegramApiKey").get}/sendMessage?chat_id=$chatId&text=Ack"
-    Logger.debug(url)
-    //ws.url(url).get()
   }
 }

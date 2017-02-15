@@ -9,16 +9,31 @@ import scala.util.Try
   * Created by manuel.zulian on 15/02/2017.
   */
 class PictureDao {
-  def create(picture: Picture): Try[Unit] =  Try {
+  def update(picture: Picture) = {
     DB.localTx { implicit session =>
-      sql"""insert into pictures(id, name, url, createdAt, votable) values
-            (${picture.id}, ${picture.name}, ${picture.url}, ${picture.createdAt}, ${picture.votable});""".update().apply()
+      sql"""update pictures set name=${picture.name}, url=${picture.url}, created_at=${picture.createdAt}, votable=${picture.votable} where id=${picture.id}""".update().apply()
+      picture
     }
   }
 
-  def findById(id: Int): Try[Option[Picture]] = Try {
+  def create(picture: Picture): Try[Picture] =  Try {
+    DB.localTx { implicit session =>
+      val id = sql"""insert into pictures(name, url, created_at, votable) values
+            (${picture.name}, ${picture.url}, ${picture.createdAt}, ${picture.votable});""".updateAndReturnGeneratedKey().apply()
+      picture.copy(id = id)
+      picture
+    }
+  }
+
+  def findById(id: Long): Try[Option[Picture]] = Try {
     DB.readOnly { implicit session =>
       sql"""select * from pictures where id=$id""".map(Picture.fromRS).single().apply()
+    }
+  }
+
+  def findLastNotVotable(): Try[Option[Picture]] = Try {
+    DB.readOnly { implicit session =>
+      sql"""select * from pictures where votable=false order by created_at desc""".map(Picture.fromRS).single().apply()
     }
   }
 }
