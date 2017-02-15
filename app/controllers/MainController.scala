@@ -4,18 +4,20 @@ import javax.inject._
 
 import models.User
 import play.api.mvc._
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.libs.json.JsValue
-import services.UserService
+import play.api.libs.ws.WSClient
+import services.{UpdateProcessService, UserService}
 
 @Singleton
-class MainController @Inject() (userService: UserService) extends Controller {
+class MainController @Inject()(updateService: UpdateProcessService)
+  extends Controller {
 
   def webhook = Action { request =>
     val updateMaybe = request.body.asJson
-    updateMaybe.map { update =>
+    updateMaybe.foreach { update =>
       Logger.debug(s"Update received: $update")
-      val user = userService.findOrCreate(User.fromJson((update \ "message" \ "from").as[JsValue]))
+      updateService.process(update.as[JsValue])
     }
     Ok
   }

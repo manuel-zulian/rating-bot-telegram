@@ -11,8 +11,8 @@ import scala.util.Try
 class PictureDao {
   def create(picture: Picture): Try[Unit] =  Try {
     DB.localTx { implicit session =>
-      sql"""insert into pictures(id, name, url, createdAt) values
-            (${picture.id}, ${picture.name}, ${picture.url}, ${picture.createdAt});""".update().apply()
+      sql"""insert into pictures(id, name, url, createdAt, votable) values
+            (${picture.id}, ${picture.name}, ${picture.url}, ${picture.createdAt}, ${picture.votable});""".update().apply()
     }
   }
 

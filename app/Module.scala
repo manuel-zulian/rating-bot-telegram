@@ -1,7 +1,6 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
-import services.{AtomicCounter, Counter}
 import scalikejdbc._
 import scalikejdbc.config.DBs
 
@@ -21,8 +20,6 @@ class Module extends AbstractModule {
     DBs.setupAll()
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
-    // Set AtomicCounter as the implementation for Counter.
-    bind(classOf[Counter]).to(classOf[AtomicCounter])
   }
 
 }
