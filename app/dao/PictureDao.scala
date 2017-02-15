@@ -21,7 +21,6 @@ class PictureDao {
       val id = sql"""insert into pictures(name, url, created_at, votable) values
             (${picture.name}, ${picture.url}, ${picture.createdAt}, ${picture.votable});""".updateAndReturnGeneratedKey().apply()
       picture.copy(id = id)
-      picture
     }
   }
 
@@ -31,9 +30,15 @@ class PictureDao {
     }
   }
 
+  def findByName(name: String): Try[Option[Picture]] = Try {
+    DB.readOnly { implicit session =>
+      sql"""select * from pictures where name=$name and votable=true""".map(Picture.fromRS).first().apply()
+    }
+  }
+
   def findLastNotVotable(): Try[Option[Picture]] = Try {
     DB.readOnly { implicit session =>
-      sql"""select * from pictures where votable=false order by created_at desc""".map(Picture.fromRS).single().apply()
+      sql"""select * from pictures where votable=false order by created_at desc""".map(Picture.fromRS).first().apply()
     }
   }
 }

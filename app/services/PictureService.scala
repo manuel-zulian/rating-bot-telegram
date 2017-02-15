@@ -10,6 +10,10 @@ import scala.util.Success
   * Created by manuel.zulian on 15/02/2017.
   */
 class PictureService @Inject()(pictureDao: PictureDao) {
+  def update(picture: Picture) = {
+    pictureDao.update(picture)
+  }
+
   def findOrCreate(picture: Picture): Picture = {
     pictureDao.findById(picture.id) match {
       case Success(Some(picture)) => picture
@@ -17,6 +21,10 @@ class PictureService @Inject()(pictureDao: PictureDao) {
         pictureDao.create(picture)
         picture
     }
+  }
+
+  def findByName(name: String): Option[Picture] = {
+    pictureDao.findByName(name).get
   }
 
   def getLastNotVotable(): Option[Picture] = {

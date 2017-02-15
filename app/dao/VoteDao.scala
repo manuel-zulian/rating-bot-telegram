@@ -9,10 +9,11 @@ import scala.util.Try
   * Created by manuel.zulian on 15/02/2017.
   */
 class VoteDao {
-  def create(vote: Vote): Try[Unit] =  Try {
+  def create(vote: Vote): Try[Vote] =  Try {
     DB.localTx { implicit session =>
-      sql"""insert into votes(id, user_id, cosplay_score, other_score) values
-            (${vote.id}, ${vote.userId}, ${vote.cosplayScore}, ${vote.otherScore});""".update().apply()
+      val id = sql"""insert into votes(user_id, picture_id, cosplay_score, other_score) values
+            (${vote.userId}, ${vote.pictureId}, ${vote.cosplayScore}, ${vote.otherScore});""".updateAndReturnGeneratedKey().apply()
+      vote.copy(id = id)
     }
   }
 
