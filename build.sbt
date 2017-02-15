@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4.1212.jre7",
   "org.scalikejdbc" %% "scalikejdbc" % "2.5.0",
   "org.scalikejdbc" %% "scalikejdbc-config" % "2.5.0",
-  "ch.qos.logback" % "logback-classic" % "1.1.7"
+  "ch.qos.logback" % "logback-classic" % "1.1.7",
+  "joda-time" % "joda-time" % "2.9.7"
 )
 
