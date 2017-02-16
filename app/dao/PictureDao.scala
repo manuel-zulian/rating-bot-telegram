@@ -11,14 +11,20 @@ import scala.util.Try
 class PictureDao {
   def update(picture: Picture) = {
     DB.localTx { implicit session =>
-      sql"""update pictures set name=${picture.name}, url=${picture.url}, created_at=${picture.createdAt}, votable=${picture.votable} where id=${picture.id}""".update().apply()
+      sql"""update pictures set name=${picture.name},
+            url=${picture.url},
+            created_at=${picture.createdAt},
+            votable=${picture.votable},
+            avg_cosplay=${picture.avgCosplay},
+            avg_other=${picture.avgOther} where id=${picture.id}""".update().apply()
       picture
     }
   }
 
-  def create(picture: Picture): Try[Picture] =  Try {
+  def create(picture: Picture): Try[Picture] = Try {
     DB.localTx { implicit session =>
-      val id = sql"""insert into pictures(name, url, created_at, votable) values
+      val id =
+        sql"""insert into pictures(name, url, created_at, votable) values
             (${picture.name}, ${picture.url}, ${picture.createdAt}, ${picture.votable});""".updateAndReturnGeneratedKey().apply()
       picture.copy(id = id)
     }

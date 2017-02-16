@@ -6,7 +6,9 @@ CREATE TABLE pictures
   name TEXT NOT NULL,
   url TEXT,
   created_at TIMESTAMP WITHOUT TIME ZONE,
-  votable BOOLEAN
+  votable BOOLEAN,
+  avg_cosplay DECIMAL DEFAULT 0.0,
+  avg_other DECIMAL DEFAULT 0.0
 );
 
 CREATE TABLE votes
