@@ -16,7 +16,8 @@ class UpdateProcessService @Inject() (
   sendMessageService: SendMessageService,
   config: Configuration) {
   def process(update: JsValue): Unit = {
-    val user = userService.findOrCreate(User.fromJson((update \ "message" \ "from").as[JsValue]))
+    val updateJson = (update \ "message" \ "from").asOpt[JsValue].getOrElse(return)
+    val user = userService.findOrCreate(User.fromJson(updateJson))
     val chatId = (update \ "message" \ "chat" \ "id").as[Int]
 
     if(((update \ "message" \ "entities")(0) \ "type").as[String] == "url") {
@@ -47,6 +48,7 @@ class UpdateProcessService @Inject() (
     command match {
       case "/name" => enableRating(arguments(0))
       case "/rate" => ratePic(arguments, user)
+      case _ => Logger.error(s"Command not recognized $command")
     }
   }
 
@@ -68,6 +70,10 @@ class UpdateProcessService @Inject() (
       Logger.debug(vote.toString)
 
       voteService.create(vote)
+      val averages = voteService.getScoresAverage(pic)
+      pictureService.update(pic.copy(avgCosplay = averages.cosplayScore, avgOther = averages.otherScore))
+    } else {
+      Logger.error(s"User ${user.id} ${user.username} already voted.")
     }
   }
 }
