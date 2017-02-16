@@ -9,6 +9,12 @@ import scala.util.Try
   * Created by manuel.zulian on 15/02/2017.
   */
 class PictureDao {
+  def getTopTen(): List[Picture] = {
+    DB.readOnly { implicit session =>
+      sql"""select * from pictures order by avg_cosplay desc, avg_other desc limit 10""".map(Picture.fromRS).list().apply()
+    }
+  }
+
   def update(picture: Picture) = {
     DB.localTx { implicit session =>
       sql"""update pictures set name=${picture.name},

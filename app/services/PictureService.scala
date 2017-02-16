@@ -10,6 +10,10 @@ import scala.util.Success
   * Created by manuel.zulian on 15/02/2017.
   */
 class PictureService @Inject()(pictureDao: PictureDao) {
+  def getTopTen(): List[Picture] = {
+    pictureDao.getTopTen()
+  }
+
   def update(picture: Picture) = {
     pictureDao.update(picture)
   }

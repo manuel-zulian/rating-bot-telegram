@@ -40,14 +40,15 @@ class UpdateProcessService @Inject() (
       Logger.debug(s"Command detected: $command")
 
       val args = (update \ "message" \ "text").as[String].split(" ").drop(1)
-      dispatch(command, args, user)
+      dispatch(command, args, user, chatId)
     }
   }
 
-  private def dispatch(command: String, arguments: Seq[String], user: User): Unit = {
+  private def dispatch(command: String, arguments: Seq[String], user: User, chatId: Int): Unit = {
     command match {
       case "/name" => enableRating(arguments(0))
       case "/rate" => ratePic(arguments, user)
+      case "/leaderboard" => sendLeaderBoard(chatId)
       case _ => Logger.error(s"Command not recognized $command")
     }
   }
@@ -75,5 +76,11 @@ class UpdateProcessService @Inject() (
     } else {
       Logger.error(s"User ${user.id} ${user.username} already voted.")
     }
+  }
+
+  private def sendLeaderBoard(chatId: Int): Unit = {
+    val topPictures = pictureService.getTopTen()
+    val text = topPictures.zipWithIndex.map{ case(e, i) => s"$i ${e.name} ${e.avgCosplay} ${e.avgOther}" }.foldRight("")((line, acc) => acc + line + "\n")
+    sendMessageService.send(chatId, text)
   }
 }
