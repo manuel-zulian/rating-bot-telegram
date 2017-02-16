@@ -1,6 +1,6 @@
 package dao
 
-import models.Vote
+import models.{Picture, User, Vote}
 import scalikejdbc._
 
 import scala.util.Try
@@ -22,4 +22,10 @@ class VoteDao {
       sql"""select * from votes where id=$id""".map(Vote.fromRS).single().apply()
     }
   }
+
+  def findByUserAndPicture(user: User, picture: Picture): Option[Vote] = Try {
+    DB.readOnly { implicit session =>
+      sql"""select * from votes where user_id=${user.id} and picture_id=${picture.id}""".map(Vote.fromRS).single().apply()
+    }
+  } getOrElse None
 }

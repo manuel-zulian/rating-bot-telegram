@@ -1,6 +1,6 @@
 package dao
 
-import models.Picture
+import models.{Picture, User}
 import scalikejdbc._
 
 import scala.util.Try

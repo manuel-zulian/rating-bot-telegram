@@ -61,11 +61,13 @@ class UpdateProcessService @Inject() (
     val cosplayScore = BigDecimal(ratings(0))
     val otherScore = BigDecimal(ratings(1))
 
-    val pic = pictureService.findByName(name)
+    val pic = pictureService.findByName(name).get
 
-    val vote = Vote(0, user.id, pic.get.id, Some(cosplayScore), Some(otherScore))
-    Logger.debug(vote.toString)
+    if(!voteService.alreadyVoted(user, pic)) {
+      val vote = Vote(0, user.id, pic.id, Some(cosplayScore), Some(otherScore))
+      Logger.debug(vote.toString)
 
-    voteService.create(vote)
+      voteService.create(vote)
+    }
   }
 }
