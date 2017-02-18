@@ -19,8 +19,9 @@ class UpdateProcessService @Inject() (
     val updateJson = (update \ "message" \ "from").asOpt[JsValue].getOrElse(return)
     val user = userService.findOrCreate(User.fromJson(updateJson))
     val chatId = (update \ "message" \ "chat" \ "id").as[Int]
+    val updateType = ((update \ "message" \ "entities")(0) \ "type").asOpt[String].getOrElse(return)
 
-    if(((update \ "message" \ "entities")(0) \ "type").as[String] == "url") {
+    if(updateType == "url") {
       val offset = ((update \ "message" \ "entities")(0) \ "offset").as[Int]
       val length = ((update \ "message" \ "entities")(0) \ "length").as[Int]
 
@@ -46,16 +47,21 @@ class UpdateProcessService @Inject() (
 
   private def dispatch(command: String, arguments: Seq[String], user: User, chatId: Int): Unit = {
     command match {
-      case "/name" => enableRating(arguments(0))
+      case "/name" => enableRating(arguments(0), chatId)
       case "/rate" => ratePic(arguments, user)
       case "/leaderboard" => sendLeaderBoard(chatId)
       case _ => Logger.error(s"Command not recognized $command")
     }
   }
 
-  private def enableRating(name: String) = {
-    val pic = pictureService.makeVotable(pictureService.getLastNotVotable().get)
-    pictureService.update(pic.copy(name = name))
+  private def enableRating(name: String, chatId: Int) = {
+    val picMaybe = pictureService.getLastNotVotable()
+    picMaybe match {
+      case Some(pic) =>
+        pictureService.makeVotable(pic)
+        pictureService.update(pic.copy(name = name))
+      case None => sendMessageService.send(chatId, "No picture available to start a vote.")
+    }
   }
 
   private def ratePic(arguments: Seq[String], user: User) = {

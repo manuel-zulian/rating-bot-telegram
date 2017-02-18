@@ -32,7 +32,7 @@ class PictureService @Inject()(pictureDao: PictureDao) {
   }
 
   def getLastNotVotable(): Option[Picture] = {
-    pictureDao.findLastNotVotable().get
+    pictureDao.findLastNotVotable().getOrElse(None)
   }
 
   def makeVotable(picture: Picture): Picture = {
